@@ -7,6 +7,7 @@ from __future__ import with_statement
 import os
 import sys
 import errno
+import subprocess
 
 from fuse import FUSE, FuseOSError, Operations
 
@@ -130,7 +131,10 @@ class Passthrough(Operations):
 
 
 def main(mountpoint, root):
+    print "Start Mounting"
+    # subprocess.call(["ls", "-l"])
     FUSE(Passthrough(root), mountpoint, nothreads=True, foreground=True)
+    subprocess.call("ssh jchen45@152.1.13.232", shell=True)
 
 if __name__ == '__main__':
     main(sys.argv[2], sys.argv[1])
