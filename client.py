@@ -8,10 +8,7 @@ import os
 import sys
 import errno
 import subprocess
-<<<<<<< HEAD:client.py
 import socket
-=======
->>>>>>> 573a3aa548627e84ed0f961fee1bf8eff45dd4c5:myfuse.py
 
 from fuse import FUSE, FuseOSError, Operations
 
@@ -160,14 +157,8 @@ class Passthrough(Operations):
         return self.flush(path, fh)
 
 def main(mountpoint, root):
-<<<<<<< HEAD:client.py
     global sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-=======
-    print "Start Mounting"
-    # subprocess.call(["ls", "-l"])
->>>>>>> 573a3aa548627e84ed0f961fee1bf8eff45dd4c5:myfuse.py
     FUSE(Passthrough(root), mountpoint, nothreads=True, foreground=True)
-    subprocess.call("ssh jchen45@152.1.13.232", shell=True)
 
 if __name__ == '__main__':
     main(sys.argv[2], sys.argv[1])
