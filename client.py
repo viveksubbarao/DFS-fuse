@@ -10,6 +10,7 @@ import errno
 import subprocess
 import socket
 
+from common import *
 from fuse import FUSE, FuseOSError, Operations
 
 HOST = ''    # The remote host
@@ -157,7 +158,20 @@ class Passthrough(Operations):
         return self.flush(path, fh)
 
 def main(mountpoint, root):
-    global sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    # Create a socket for communication with the server
+    global sock
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    
+    # Create mountpoint and directory to mount if they do not exist.
+    # We plan to bypass the mounting requirement of FUSE by creating a
+    # dummy mount point and mount root.
+    if not os.path.exists(mountpoint):
+        print("Directory ", mountpoint, "does not exist. Creating it")
+        os.mkdir(mountpoint)
+    if not os.path.exists(root):
+        print("Directory ", root, "does not exist. Creating it")
+        os.mkdir(root)
+    
     FUSE(Passthrough(root), mountpoint, nothreads=True, foreground=True)
 
 if __name__ == '__main__':
