@@ -86,6 +86,7 @@ class Passthrough(Operations):
 
     def mkdir(self, path, mode):
         print("mkdir")
+        print('making directory')
         return os.mkdir(self._full_path(path), mode)
 
     def statfs(self, path):
@@ -126,6 +127,7 @@ class Passthrough(Operations):
 
     def create(self, path, mode, fi=None):
         print("create")
+        print('creating file')
         full_path = self._full_path(path)
         return os.open(full_path, os.O_WRONLY | os.O_CREAT, mode)
 
