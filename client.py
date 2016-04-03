@@ -85,6 +85,7 @@ class Passthrough(Operations):
 
     def mkdir(self, path, mode):
         print("mkdir")
+        print('making directory')
         return os.mkdir(self._full_path(path), mode)
 
     def statfs(self, path):
@@ -125,6 +126,7 @@ class Passthrough(Operations):
 
     def create(self, path, mode, fi=None):
         print("create")
+        print('creating file')
         full_path = self._full_path(path)
         return os.open(full_path, os.O_WRONLY | os.O_CREAT, mode)
 
@@ -157,7 +159,7 @@ class Passthrough(Operations):
         return self.flush(path, fh)
 
 def main(mountpoint, root):
-    global sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    #global sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     FUSE(Passthrough(root), mountpoint, nothreads=True, foreground=True)
 
 if __name__ == '__main__':
