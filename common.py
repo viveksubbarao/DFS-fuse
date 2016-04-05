@@ -1,3 +1,8 @@
+import socket
+import sys
+import json
+import os
+
 # Filesystem methods
 DFS_ACCESS = 1
 DFS_CHMOD = 2
@@ -26,7 +31,6 @@ DFS_RELEASE = 22
 DFS_FSYNC = 23
 
 ''''
-dfs_opers = {DFS_ACESS:,
 DFS_CHMOD:,
 DFS_CHOWN:,
 DFS_GETATTR:,
@@ -51,3 +55,42 @@ DFS_RELEASE:,
 DFS_FSYNC:
 }
 '''
+def send_and_recv(conn, command, param_list):
+    print(command, param_list)
+    command_string = stringify_command(command, param_list)
+    print(command_string)
+    conn.send(command_string)
+    
+    result = conn.recv(1000)
+    print(result)
+    
+    #resObj = {}
+    res = json.loads(result)
+    print res
+    return res
+	#res_data = resObj['data']
+	#retval = resObj['retval']
+    ''''
+    if retval:
+        return retval
+    else:
+        return res_data
+    '''
+
+#returns a serialized json string with the command and parameters
+def stringify_command(command, param_list):
+	commandObj = {}
+	commandObj['command'] = command
+	commandObj['param_list'] = param_list
+	
+	print json.dumps(commandObj)
+	return json.dumps(commandObj)
+
+#returns a serialized json string with the command and parameters
+def stringify_result(ret):
+	#resObj = {}
+	#resObj['retval'] = retval
+	#resObj['data'] = data
+	
+	print json.dumps(ret)
+	return json.dumps(ret)
