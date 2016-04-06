@@ -8,6 +8,8 @@ HOST = ''                 # Symbolic name meaning all available interfaces
 PORT = 50007              # Arbitrary non-privileged port
 
 class dfs:
+
+
     # Filesystem methods
     # ==================
 
@@ -152,6 +154,56 @@ def execute_json_command(conn, command_string):
     command = commandObj['command']
     print command
     print param_list
+
+    func = dfs()
+    # Filesystem methods
+    if command == DFS_ACCESS:
+        func.dfs_access(param_list[0], param_list[1])
+    elif command == DFS_CHMOD:
+        func.dfs_chmod(param_list[0], param_list[1])
+    elif command == DFS_CHOWN:
+        func.dfs_chown(param_list[0], param_list[1], param_list[2])
+    elif command == DFS_GETATTR:
+        func.dfs_getattr(param_list[0], param_list[1])
+    elif command == DFS_READDIR:
+        func.dfs_readdir(param_list[0])
+    elif command == DFS_READLINK:
+        func.dfs_readlink(param_list[0])
+    elif command == DFS_MKNOD:
+        func.dfs_mknod(param_list[0], param_list[1])
+    elif command == DFS_RMDIR:
+        func.dfs_rmdir(param_list[0], param_list[1])
+    elif command == DFS_MKDIR:
+        func.dfs_mkdir(param_list[0], param_list[1])
+    elif command == DFS_STATFS:
+        func.dfs_statfs(param_list[0])
+    elif command == DFS_UNLINK:
+        func.dfs_unlink(param_list[0])
+    elif command == DFS_SYMLINK:
+        func.dfs_symlink(param_list[0], param_list[1])
+    elif command == DFS_RENAME:
+        func.dfs_rename(param_list[0], param_list[1])
+    elif command == DFS_LINK:
+        func.dfs_link(param_list[0], param_list[1])
+    elif command == DFS_UTIMES:
+        func.dfs_utime(param_list[0], param_list[1])
+    # File methods
+    elif command == DFS_OPEN:
+        func.dfs_open(param_list[0], param_list[1])
+    elif command == DFS_CREATE:
+        func.dfs_create(param_list[0], param_list[1])
+    elif command == DFS_READ:
+        func.dfs_read(param_list[0], param_list[1])
+    elif command == DFS_WRITE:
+        func.dfs_write(param_list[0], param_list[1], param_list[2], param_list[3])
+    elif command == DFS_TRUNCATE:
+        func.dfs_truncate(param_list[0], param_list[1])
+    elif command == DFS_FLUSH:
+        func.dfs_flush(param_list[0], param_list[1])
+    elif command == DFS_RELEASE:
+        func.dfs_release(param_list[0], param_list[1])
+    elif command == DFS_FSYNC:
+        func.dfs_fsync(param_list[0], param_list[1], param_list[2])
 
     dfsObj = dfs()
     ret = dfsObj.dfs_oper[command](param_list)
