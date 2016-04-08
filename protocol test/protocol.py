@@ -1,11 +1,12 @@
 import socket
 import sys
 import json 
+from datetime import datetime
 
 
 #server's hostname here
 host = socket.gethostname()   
-port = 8080
+port = 50007
 
 
 #command_dict 	   = {'create':1 , 'read':2 , 'write' :3 }
@@ -57,6 +58,13 @@ def mkdir(self, path, mode):
 	print 'path'+str(path)
 	print 'mode'+str(mode)
 
+# this method updates the data strucutre for the heartbeat times
+
+def heartBeat(servername):
+	heartBeatTimes[servername] = datetime.now()
+	serverStatus[servername] = 'alive'
+
+
 def stringify_command(command, param_list):
 	commandObj = {}
 	#commandObj['command'] = command_dict.get(command)
@@ -75,6 +83,10 @@ def execute_json_command(command_string):
 	eval(command)(*param_list)
 
 
+
 #execute_json_command( stringify_command('mkdir',['selfie',2,'moodu']))
 
+########## data structues to track heartbeats and server status ##############
 
+heartBeatTimes = {}
+serverStatus = {}
