@@ -200,7 +200,7 @@ fileNew = os.getcwd() + '/file1.txt'
 
 # func.dfs_link(fileOld, fileNew)
 
-stinfo = os.stat(fileOld)
+# stinfo = os.stat(fileOld)
 # print stinfo
 # Using os.stat to recieve atime and mtime of file
 # print "access time of a2.py: %s" %stinfo.st_atime
@@ -215,13 +215,13 @@ times = (1500000000.0, 1500000000)
 # create a file read/write by owner only
 # func.dfs_create(fileNew, stat.S_IRUSR | stat.S_IWUSR)
 
-# fd = os.open(fileOld, os.O_RDWR)
+fd = os.open(fileOld, os.O_RDWR)
 # ret = os.read(fd, 5)
 # print ret
 offset = 5
 length = 5  # read from 6-10
-# print func.dfs_read(fileOld, length, offset, fd)
-# os.close(fd)
+print func.dfs_read(fileOld, length, offset, fd)
+os.close(fd)
 
 # fd = os.open(fileOld, os.O_RDWR)
 # offset = 10

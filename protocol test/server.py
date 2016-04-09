@@ -77,7 +77,7 @@ class dfs:
     def dfs_mkdir(self, path, mode):
         print("mkdir")
         #return os.mkdir(path, mode)
-        return os.mkdir('/home/freeradical/Documents',mode)
+        return os.mkdir(path, mode)
 
     # Remove (delete) the directory path.
     def dfs_rmdir(self, path):
@@ -119,24 +119,33 @@ class dfs:
         return os.open(path, os.O_WRONLY | os.O_CREAT, mode)
 
     # The method read() reads at most n bytes from file desciptor fd, return a string containing the bytes read
-    def dfs_read(self, path, length, offset, fh):
+    def dfs_read(self, path, length, offset, fd):
         print 'read'
-        os.lseek(fh, offset, os.SEEK_SET)
-        return os.read(fh, length)
+        fd = os.open(path, os.O_RDWR)
+        os.lseek(fd, offset, os.SEEK_SET)
+        result = os.read(fd, length)
+        os.close(fd)
+        return result
 
-    def dfs_write(self, path, buf, offset, fh):
+    def dfs_write(self, path, buf, offset, fd):
         print 'write'
-        os.lseek(fh, offset, os.SEEK_SET)
-        return os.write(fh, buf)
+        fd = os.open(path, os.O_RDWR)
+        os.lseek(fd, offset, os.SEEK_SET)
+        result = os.write(fd, buf)
+        os.close(fd)
+        return result
 
     def dfs_truncate(self, path, length):
         print 'truncate'
         with open(path, 'r+') as f: f.truncate(length)
 
     # The method fsync() forces write of file with file descriptor fd to disk
-    def dfs_flush(self, path, fh):
+    def dfs_flush(self, path, fd):
         print 'flush'
-        return os.fsync(fh)
+        fd = os.open(path, os.O_RDWR)
+        result = os.fsync(fd)
+        os.close(fd)
+        return result
 
     def dfs_release(self, path, fh):
         print 'release'
@@ -158,16 +167,16 @@ def execute_json_command(conn, command_string):
     commandObj = json.loads(command_string)
     param_list = commandObj['param_list']
     command = commandObj['command']
-    print command
-    print param_list
+    print command + " : " + str(param_list)
 
     dfsObj = dfs()
     #ret = dfsObj.dfs_oper[command](param_list)
-    ret = eval('dfsObj.'+command)(*param_list)
-    print ret
-    result_string = stringify_result(ret)
-    print result_string
-    conn.send(result_string)
+    ret = eval('dfsObj.dfs_'+command)(*param_list)
+    print '\n'
+    # print ret
+    # result_string = stringify_result(ret)
+    # print result_string
+    # conn.send(result_string)
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind((HOST, PORT))
@@ -177,7 +186,7 @@ while 1:
     conn, addr = s.accept()
     print 'Connected by ', addr
     data = conn.recv(1024)
-    print data, len(data)
+    # print data, len(data)
     execute_json_command(conn, data)
     conn.close()
 

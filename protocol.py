@@ -5,7 +5,7 @@ from datetime import datetime
 
 
 #server's hostname here
-host = socket.gethostname()   
+host = socket.gethostname()
 port = 8080
 
 
@@ -21,7 +21,7 @@ def send_command(command,param_list):
 	
 	s.send(command_string) 
 	s.close()
-	
+
 
 
 def listen_for_command():
