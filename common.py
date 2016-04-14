@@ -2,6 +2,11 @@ import socket
 import sys
 import json
 import os
+import logging
+
+logging.basicConfig(stream=sys.stderr, format='%(asctime)s - %(levelname)s - %(message)s')
+log = logging.getLogger()
+log.setLevel(logging.DEBUG)
 
 # Filesystem methods
 DFS_ACCESS = 1
@@ -18,7 +23,7 @@ DFS_UNLINK = 11
 DFS_SYMLINK = 12
 DFS_RENAME = 13
 DFS_LINK = 14
-DFS_UTIMES = 15
+DFS_UTIMENS = 15
 
 # File methods
 DFS_OPEN = 16
@@ -30,52 +35,39 @@ DFS_FLUSH = 21
 DFS_RELEASE = 22
 DFS_FSYNC = 23
 
-''''
-DFS_CHMOD:,
-DFS_CHOWN:,
-DFS_GETATTR:,
-DFS_READDIR:,
-DFS_READLINK:,
-DFS_MKNOD:,
-DFS_RMDIR:,
-DFS_MKDIR:,
-DFS_STATFS:,
-DFS_UNLINK:,
-DFS_SYMLINK:,
-DFS_RENAME:,
-DFS_LINK:,
-DFS_UTIMES:,
-DFS_OPEN:,
-DFS_CREATE:,
-DFS_READ:,
-DFS_WRITE:,
-DFS_TRUNCATE:,
-DFS_FLUSH:,
-DFS_RELEASE:,
-DFS_FSYNC:
-}
-'''
+def _decode_list(data):
+    rv = []
+    for item in data:
+        if isinstance(item, unicode):
+            item = item.encode('utf-8')
+        elif isinstance(item, list):
+            item = _decode_list(item)
+        elif isinstance(item, dict):
+            item = _decode_dict(item)
+        rv.append(item)
+    return rv
+
+def _decode_dict(data):
+    rv = {}
+    for key, value in data.iteritems():
+        if isinstance(key, unicode):
+            key = key.encode('utf-8')
+        if isinstance(value, unicode):
+            value = value.encode('utf-8')
+        elif isinstance(value, list):
+            value = _decode_list(value)
+        elif isinstance(value, dict):
+            value = _decode_dict(value)
+        rv[key] = value
+    return rv
+    
 def send_and_recv(conn, command, param_list):
-    print(command, param_list)
     command_string = stringify_command(command, param_list)
-    print(command_string)
     conn.send(command_string)
     
     result = conn.recv(1000)
-    print(result)
-    
-    #resObj = {}
-    res = json.loads(result)
-    print res
+    res = json.loads(result, object_hook=_decode_dict)
     return res
-	#res_data = resObj['data']
-	#retval = resObj['retval']
-    ''''
-    if retval:
-        return retval
-    else:
-        return res_data
-    '''
 
 #returns a serialized json string with the command and parameters
 def stringify_command(command, param_list):
@@ -83,14 +75,8 @@ def stringify_command(command, param_list):
 	commandObj['command'] = command
 	commandObj['param_list'] = param_list
 	
-	print json.dumps(commandObj)
 	return json.dumps(commandObj)
 
 #returns a serialized json string with the command and parameters
 def stringify_result(ret):
-	#resObj = {}
-	#resObj['retval'] = retval
-	#resObj['data'] = data
-	
-	print json.dumps(ret)
 	return json.dumps(ret)

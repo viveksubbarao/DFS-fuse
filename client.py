@@ -1,5 +1,4 @@
 # https://www.stavros.io/posts/python-fuse-filesystem/
-
 #!/usr/bin/env python
 
 from __future__ import with_statement
@@ -18,151 +17,139 @@ PORT = 50007 # The same port as used by the server
 sock = -1
 
 class Passthrough(Operations):
-    def __init__(self, root):
-        self.root = root
-
-    # Helpers
-    # =======
-
-    def _full_path(self, partial):
-        if partial.startswith("/"):
-            partial = partial[1:]
-        path = os.path.join(self.root, partial)
-        return path
-
     # Filesystem methods
     # ==================
 
     def access(self, path, mode):
         print("access")
-        full_path = self._full_path(path)
-        if not os.access(full_path, mode):
+        if not send_and_recv(sock, DFS_ACCESS, [path, mode]):
             raise FuseOSError(errno.EACCES)
+        #if not os.access(full_path, mode):
+        #    raise FuseOSError(errno.EACCES)
 
     def chmod(self, path, mode):
         print("chmod")
-        full_path = self._full_path(path)
-        return os.chmod(full_path, mode)
+        return send_and_recv(sock, DFS_CHMOD, [path, mode])
+        #return os.chmod(full_path, mode)
 
     def chown(self, path, uid, gid):
         print("chown")
-        full_path = self._full_path(path)
-        return os.chown(full_path, uid, gid)
+        return send_and_recv(sock, DFS_CHOWN, [path, uid, gid])
+        #return os.chown(full_path, uid, gid)
 
     def getattr(self, path, fh=None):
         print("getattr")
-        full_path = self._full_path(path)
-        st = os.lstat(full_path)
-        return dict((key, getattr(st, key)) for key in ('st_atime', 'st_ctime',
-                     'st_gid', 'st_mode', 'st_mtime', 'st_nlink', 'st_size', 'st_uid'))
+        ret = send_and_recv(sock, DFS_GETATTR, [path, fh])
+        if ret == False:
+            raise FuseOSError(errno.ENOENT)
+        return ret
+        #st = os.lstat(full_path)
+        #return dict((key, getattr(st, key)) for key in ('st_mode', 'st_ino', 'st_dev', 'st_nlink', 'st_uid', 'st_gid', 'st_size', 'st_atime', 'st_mtime', 'st_ctime'))
 
     def readdir(self, path, fh):
         print("readdir");
-        full_path = self._full_path(path)
-
-        dirents = ['.', '..']
-        if os.path.isdir(full_path):
-            dirents.extend(os.listdir(full_path))
-        for r in dirents:
-            yield r
+        return send_and_recv(sock, DFS_READDIR, [path, fh])
 
     def readlink(self, path):
         print("readlink")
-        pathname = os.readlink(self._full_path(path))
-        if pathname.startswith("/"):
-            # Path name is absolute, sanitize it.
-            return os.path.relpath(pathname, self.root)
-        else:
-            return pathname
+        return send_and_recv(sock, DFS_READLINK, [path])
 
     def mknod(self, path, mode, dev):
         print("mknod")
-        return os.mknod(self._full_path(path), mode, dev)
+        return send_and_recv(sock, DFS_MKNOD, [path, mode, dev])
+        #return os.mknod(self._full_path(path), mode, dev)
 
     def rmdir(self, path):
         print("rmdir")
-        full_path = self._full_path(path)
-        return os.rmdir(full_path)
+        return send_and_recv(sock, DFS_RMDIR, [path])
+        #return os.rmdir(full_path)
 
     def mkdir(self, path, mode):
         print("mkdir")
-        print('making directory')
-        return os.mkdir(self._full_path(path), mode)
+        return send_and_recv(sock, DFS_MKDIR, [path, mode])
+        #return os.mkdir(self._full_path(path), mode)
 
     def statfs(self, path):
         print("statfs")
-        full_path = self._full_path(path)
-        stv = os.statvfs(full_path)
-        return dict((key, getattr(stv, key)) for key in ('f_bavail', 'f_bfree',
-            'f_blocks', 'f_bsize', 'f_favail', 'f_ffree', 'f_files', 'f_flag',
-            'f_frsize', 'f_namemax'))
+        return send_and_recv(sock, DFS_STATFS, [path])
+        #print(ret)
 
     def unlink(self, path):
         print("unlink")
-        return os.unlink(self._full_path(path))
+        return send_and_recv(sock, DFS_UNLINK, [path])
+        #return os.unlink(self._full_path(path))
 
     def symlink(self, name, target):
         print("symlink")
-        return os.symlink(name, self._full_path(target))
+        return send_and_recv(sock, DFS_SYMLINK, [name, path])
+        #return os.symlink(name, self._full_path(target))
 
     def rename(self, old, new):
         print("rename")
-        return os.rename(self._full_path(old), self._full_path(new))
+        return send_and_recv(sock, DFS_RENAME, [old, new])
+        #return os.rename(self._full_path(old), self._full_path(new))
 
     def link(self, target, name):
         print("link")
-        return os.link(self._full_path(target), self._full_path(name))
+        return send_and_recv(sock, DFS_LINK, [target, name])
+        #return os.link(self._full_path(target), self._full_path(name))
 
     def utimens(self, path, times=None):
         print("utimes")
-        return os.utime(self._full_path(path), times)
+        return send_and_recv(sock, DFS_UTIMENS, [path, times])
+        #return os.utime(self._full_path(path), times)
 
     # File methods
     # ============
 
     def open(self, path, flags):
         print("open")
-        full_path = self._full_path(path)
-        return os.open(full_path, flags)
+        return send_and_recv(sock, DFS_OPEN, [path, flags])
+        #return os.open(full_path, flags)
 
     def create(self, path, mode, fi=None):
         print("create")
-        print('creating file')
-        full_path = self._full_path(path)
-        return os.open(full_path, os.O_WRONLY | os.O_CREAT, mode)
+        return send_and_recv(sock, DFS_CREATE, [path, mode, fi])
+        #return os.open(full_path, os.O_WRONLY | os.O_CREAT, mode)
 
     def read(self, path, length, offset, fh):
         print("read")
-        os.lseek(fh, offset, os.SEEK_SET)
-        return os.read(fh, length)
+        return send_and_recv(sock, DFS_READ, [path, length, offset, fh])
+        #os.lseek(fh, offset, os.SEEK_SET)
+        #return os.read(fh, length)
 
     def write(self, path, buf, offset, fh):
         print("write")
-        os.lseek(fh, offset, os.SEEK_SET)
-        return os.write(fh, buf)
+        return send_and_recv(sock, DFS_WRITE, [path, buf, offset, fh])
+        #os.lseek(fh, offset, os.SEEK_SET)
+        #return os.write(fh, buf)
 
     def truncate(self, path, length, fh=None):
         print("truncate")
-        full_path = self._full_path(path)
-        with open(full_path, 'r+') as f:
-            f.truncate(length)
+        return send_and_recv(sock, DFS_TRUNCATE, [path, length, fh])
+        #with open(full_path, 'r+') as f:
+        #    f.truncate(length)
 
     def flush(self, path, fh):
         print("flush")
-        return os.fsync(fh)
+        return send_and_recv(sock, DFS_FLUSH, [path, fh])
+        #return os.fsync(fh)
 
     def release(self, path, fh):
         print("release")
-        return os.close(fh)
+        return send_and_recv(sock, DFS_RELEASE, [path, fh])
+        #return os.close(fh)
 
     def fsync(self, path, fdatasync, fh):
         print("fsync")
-        return self.flush(path, fh)
+        return send_and_recv(sock, DFS_FSYNC, [path, fdatasync, fh])
+        #return self.flush(path, fh)
 
-def main(mountpoint, root):
+def main(mountpoint):
     # Create a socket for communication with the server
     global sock
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.connect((HOST, PORT))
     
     # Create mountpoint and directory to mount if they do not exist.
     # We plan to bypass the mounting requirement of FUSE by creating a
@@ -170,11 +157,10 @@ def main(mountpoint, root):
     if not os.path.exists(mountpoint):
         print("Directory ", mountpoint, "does not exist. Creating it")
         os.mkdir(mountpoint)
-    if not os.path.exists(root):
-        print("Directory ", root, "does not exist. Creating it")
-        os.mkdir(root)
-    
-    FUSE(Passthrough(root), mountpoint, nothreads=True, foreground=True)
+
+    FUSE(Passthrough(), mountpoint, nothreads=True, foreground=True)
+
+    sock.close()
 
 if __name__ == '__main__':
-    main(sys.argv[2], sys.argv[1])
+    main(sys.argv[1])
