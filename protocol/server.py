@@ -1,7 +1,7 @@
 # Echo server program
 import socket
 import os
-
+from heartbeat import *
 from common import *
 
 HOST = ''                 # Symbolic name meaning all available interfaces
@@ -177,6 +177,10 @@ def execute_json_command(conn, command_string):
     # result_string = stringify_result(ret)
     # print result_string
     # conn.send(result_string)
+
+emitheartbeats = heartBeatEmit('s1')
+emitheartbeats.daemon = True
+emitheartbeats.start()
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind((HOST, PORT))

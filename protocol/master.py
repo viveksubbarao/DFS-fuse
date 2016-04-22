@@ -1,8 +1,16 @@
 #!/usr/bin/python
 import socket
 import psycopg2
-
+from heartbeat import *
 from common import *
+
+
+
+
+
+checkheartbeat = heartBeatCheck()
+checkheartbeat.daemon = True
+checkheartbeat.start()
 
 with open('credentials.txt', 'r') as f:
     credentials = f.readline().split(':')
@@ -12,12 +20,12 @@ HOST = ''                 # Symbolic name meaning all available interfaces
 PORT = 50008              # Arbitrary non-privileged port
 
 i = 0
-def execute_json_command(conn, command_string):
+'''def execute_json_command(conn, command_string):
     commandObj = json.loads(command_string)
     param_list = commandObj['param_list']
     command = commandObj['command']
     print i
-    print command
+    print command'''
 i += 1
 
 
@@ -35,7 +43,8 @@ while 1:
         data = conn.recv(1024)
         if not data:
             break
-        execute_json_command(conn, data)
+        #execute_json_command(conn, data)
+        execute_json_command( data)
 
 # release source
 conn.close()

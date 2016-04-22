@@ -2,9 +2,9 @@ import socket
 import sys
 import json
 import os
-# import stat
 from datetime import datetime
 from stat import *
+import heartbeat
 
 #server's hostname here
 host = socket.gethostname()
@@ -56,10 +56,12 @@ def mkdir(path, mode):
 
 # this method updates the data strucutre for the heartbeat times
 
-def heartBeat(servername):
-	heartBeatTimes[servername] = datetime.now()
-	serverStatus[servername] = 'alive'
-
+def heartBeat(servername,idontknow):
+	print 'in heartbeat function '+idontknow
+	heartbeat.heartBeatTimes[servername] = datetime.now()
+	heartbeat.serverStatus[servername] = 'alive'
+	#print heartbeat.heartBeatTimes
+	#print heartbeat.serverStatus
 
 def stringify_command(command, param_list):
 	commandObj = {}
@@ -72,10 +74,12 @@ def stringify_command(command, param_list):
 
 
 def execute_json_command(command_string):
+	#print 'in execute_json_command'
 	commandObj = json.loads(command_string)
 	param_list = commandObj['param_list']
 
 	command = commandObj['command']
+	print 'executing '+ command +' and passing parameter list ' + param_list
 	eval(command)(*param_list)
 
 
@@ -161,11 +165,7 @@ os.close(fd)
 
 ### Test access in 50008
 path = os.getcwd() + '/common.py'
-send_command('access', [path, os.F_OK])
+#send_command('access', [path, os.F_OK])
 
 # send_command('', [])
 
-########## data structues to track heartbeats and server status ##############
-
-heartBeatTimes = {}
-serverStatus = {}
