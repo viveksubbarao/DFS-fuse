@@ -43,10 +43,6 @@ def listen_for_command():
 	    #print 'writing file ....'
 
 
-
-
-
-
 #returns a serialized json string with the command and parameters
 
 def rmdir(self, path):
