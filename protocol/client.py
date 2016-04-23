@@ -9,6 +9,7 @@ import sys
 import errno
 import subprocess
 import socket
+
 from protocol import *
 
 #from common import *
@@ -178,5 +179,9 @@ def main(mountpoint, root):
     
     FUSE(Passthrough(root), mountpoint, nothreads=True, foreground=True)
 
-if __name__ == '__main__':
-    main(sys.argv[2], sys.argv[1])
+# def test_journaling():
+path = os.getcwd()
+send_command('readdir', [path])
+
+# if __name__ == "__main__":
+#     main(sys.argv[2], sys.argv[1])

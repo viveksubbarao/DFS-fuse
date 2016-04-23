@@ -2,8 +2,13 @@
 import socket
 import psycopg2
 
+from heartbeat import *
 from common import *
 from datetime import datetime
+
+checkheartbeat = heartBeatCheck()
+checkheartbeat.daemon = True
+checkheartbeat.start()
 
 with open('credentials.txt', 'r') as f:
     credentials = f.readline().split(':')
@@ -24,7 +29,7 @@ def execute_json_command(conn, command_string):
 
 def send_command(command, param_list):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect((HOST, N1))
+    s.connect((socket.gethostname(), N1))
 
     command_string = stringify_command(command, param_list)
     
@@ -51,6 +56,7 @@ def receiving(conn_db):
     # release source
     conn.close()
     s.close()
+
 
 def journaling(command, param_list, server_id):
     if conn_db is None:

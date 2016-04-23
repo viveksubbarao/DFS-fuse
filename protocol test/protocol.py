@@ -164,7 +164,3 @@ os.close(fd)
 
 # send_command('', [])
 
-########## data structues to track heartbeats and server status ##############
-
-heartBeatTimes = {}
-serverStatus = {}
