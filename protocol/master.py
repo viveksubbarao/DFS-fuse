@@ -3,6 +3,7 @@ import socket
 import psycopg2
 
 from common import *
+from datetime import datetime
 
 with open('credentials.txt', 'r') as f:
     credentials = f.readline().split(':')
@@ -10,38 +11,63 @@ with open('credentials.txt', 'r') as f:
 
 HOST = ''                 # Symbolic name meaning all available interfaces
 PORT = 50008              # Arbitrary non-privileged port
+N1 = 50009
+N2 = 50010
 
-i = 0
+conn_db = ''
+
 def execute_json_command(conn, command_string):
     commandObj = json.loads(command_string)
     param_list = commandObj['param_list']
     command = commandObj['command']
-    print i
-    print command
-i += 1
+    send_command(command, param_list)
 
+def send_command(command, param_list):
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect((HOST, N1))
 
-print 'connecting...'
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.bind((HOST, PORT))
-s.listen(1)
+    command_string = stringify_command(command, param_list)
+    
+    s.send(command_string)
+    journaling(command, param_list, 'N1')
+    s.close()
 
-
-while 1:
-    conn, addr = s.accept()
-    print 'Connected by: ', addr
+def receiving(conn_db):
+    print 'Receiving commands'
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.bind((HOST, PORT))
+    s.listen(1)
 
     while 1:
-        data = conn.recv(1024)
-        if not data:
-            break
-        execute_json_command(conn, data)
+        conn, addr = s.accept()
+        print 'Connected by: ', addr
 
-# release source
-conn.close()
-s.close()
+        while 1:
+            data = conn.recv(1024)
+            if not data:
+                break
+            execute_json_command(conn, data)
 
-def main():
+    # release source
+    conn.close()
+    s.close()
+
+def journaling(command, param_list, server_id):
+    if conn_db is None:
+        print 'Connection error'
+        exit(1)
+
+    cursor = conn_db.cursor()
+    print param_list[0][param_list[0].rindex('/') + 1 : ]
+    sql = 'INSERT ' \
+        + 'INTO dfs_journal(filename, N1, N2) ' \
+        + 'VALUES(\'' + param_list[0][param_list[0].rindex('/') + 1 : ] + '\', CURRENT_TIMESTAMP, null);'
+    cursor.execute(sql)
+    conn_db.commit()
+
+def connection():
+    global conn_db
+
     #Define our connection string
     dbname = credentials[0]
     username = credentials[1]
@@ -53,11 +79,14 @@ def main():
     print "Connecting to database\n ->%s" % (conn_string)
  
     # get a connection, if a connect cannot be made an exception will be raised here
-    conn = psycopg2.connect(conn_string)
+    conn_db = psycopg2.connect(conn_string)
  
     # conn.cursor will return a cursor object, you can use this cursor to perform queries
-    cursor = conn.cursor()
+    # cursor = conn.cursor()
     print "Connected!\n"
+    return conn_db
  
 if __name__ == "__main__":
-    main()
+    conn_db = connection()
+    receiving(conn_db)
+

@@ -41,8 +41,6 @@ def listen_for_command():
 	    execute_json_command(data)
 	    #print 'writing file ....'
 
-	    #print 'writing file ....'
-
 #returns a serialized json string with the command and parameters
 
 def rmdir(self, path):
@@ -162,6 +160,9 @@ os.close(fd)
 ### Test access in 50008
 path = os.getcwd() + '/common.py'
 send_command('access', [path, os.F_OK])
+
+# path = os.getcwd()
+# send_command('readdir', [path])
 
 # send_command('', [])
 
