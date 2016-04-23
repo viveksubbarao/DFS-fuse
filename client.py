@@ -13,7 +13,7 @@ from common import *
 from fuse import FUSE, FuseOSError, Operations
 
 HOST = ''    # The remote host
-PORT = 50007 # The same port as used by the server
+PORT = 50008 # The same port as used by the server
 sock = -1
 
 class Passthrough(Operations):
