@@ -10,10 +10,9 @@ import subprocess
 import socket
 
 from common import *
+from protocol import *
 from fuse import FUSE, FuseOSError, Operations
 
-HOST = ''    # The remote host
-PORT = 50008 # The same port as used by the server
 sock = -1
 
 class Passthrough(Operations):
@@ -149,7 +148,7 @@ def main(mountpoint):
     # Create a socket for communication with the server
     global sock
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect((HOST, PORT))
+    sock.connect((HOST, M_PORT))
     
     # Create mountpoint and directory to mount if they do not exist.
     # We plan to bypass the mounting requirement of FUSE by creating a

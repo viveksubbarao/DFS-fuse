@@ -7,8 +7,6 @@ import logging
 from heartbeat import *
 from common import *
 
-HOST = ''                 # Symbolic name meaning all available interfaces
-# PORT = 50007              # Arbitrary non-privileged port
 DIR = "/Users/vsrao/ws/sdir"
 
 class dfs:
@@ -214,7 +212,7 @@ def execute_json_command(conn, command_string):
     result_string = stringify_result(ret)
     conn.send(result_string)
 
-def main(PORT):
+def main():
 
     #begin - rakesh
     # added code here to emit heartbeats from server to master 
@@ -224,7 +222,7 @@ def main(PORT):
     #end 
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind((HOST, PORT))
+    s.bind((HOST, S1_PORT))
     s.listen(1)
     
     while 1:
@@ -235,14 +233,9 @@ def main(PORT):
             data = conn.recv(1024)
             if not data: break
             execute_json_command(conn, data)
-        
-    conn.close()
+        conn.close()
+
     s.close()
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print 'Usage: python server_port'
-        exit(1)
-    # print type()
-    port = int(sys.argv[1])
-    main(port)
+    main()

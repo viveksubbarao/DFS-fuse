@@ -8,6 +8,18 @@ logging.basicConfig(stream=sys.stderr, format='%(asctime)s - %(levelname)s - %(m
 log = logging.getLogger()
 log.setLevel(logging.DEBUG)
 
+client_sock = -1
+server1_sock = -1
+server2_sock = -1
+
+HOST = '' # Symbolic name meaning all available interfaces
+M_PORT = 50008 # master listening port
+S1_PORT = 50009 # server 1 listening port
+S2_PORT = 50010 # server 2 listening port
+HB_PORT = 50011 # heartbeat listening port
+
+conn_db = ''
+
 # Filesystem methods
 DFS_ACCESS = 1
 DFS_CHMOD = 2
@@ -34,40 +46,6 @@ DFS_TRUNCATE = 20
 DFS_FLUSH = 21
 DFS_RELEASE = 22
 DFS_FSYNC = 23
-
-def _decode_list(data):
-    rv = []
-    for item in data:
-        if isinstance(item, unicode):
-            item = item.encode('utf-8')
-        elif isinstance(item, list):
-            item = _decode_list(item)
-        elif isinstance(item, dict):
-            item = _decode_dict(item)
-        rv.append(item)
-    return rv
-
-def _decode_dict(data):
-    rv = {}
-    for key, value in data.iteritems():
-        if isinstance(key, unicode):
-            key = key.encode('utf-8')
-        if isinstance(value, unicode):
-            value = value.encode('utf-8')
-        elif isinstance(value, list):
-            value = _decode_list(value)
-        elif isinstance(value, dict):
-            value = _decode_dict(value)
-        rv[key] = value
-    return rv
-    
-def send_and_recv(conn, command, param_list):
-    command_string = stringify_command(command, param_list)
-    conn.send(command_string)
-    
-    result = conn.recv(1000)
-    res = json.loads(result, object_hook=_decode_dict)
-    return res
 
 #returns a serialized json string with the command and parameters
 def stringify_command(command, param_list):

@@ -2,7 +2,7 @@ import threading
 import time
 from datetime import datetime
 from protocol import *
-
+from common import *
 
 ########## data structues to track heartbeats and server status ##############
 
@@ -11,14 +11,30 @@ heartBeatTimes = {}
 global serverStatus 
 serverStatus = {}
 
+curr_server_sock = [server1_sock]
+curr_server = 0;
+
+def get_curr_server():
+    global curr_server_sock, curr_server
+    return curr_server_sock[curr_server]
+
+# this method updates the data strucutre for the heartbeat times
+def heartBeat(servername):
+    #print 'in heartbeat function '#+idontknow
+    heartBeatTimes[servername[0]] = datetime.now()
+    serverStatus[servername[0]] = 'alive'
+    #print heartbeat.heartBeatTimes
+    #print heartbeat.serverStatus
+
 ## this cass would have to be imported into the server processes and the heartbeat emitter threat would emit  
 ##  heartbeats
 def heartBeatEmitter(threadName):
-    
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect((HOST, M_PORT))
     while True:
         time.sleep(1)
-        print 'Emitting heart beats from '+ threadName
-        send_command('heartbeat',[threadName])
+        #print 'Emitting heart beats from '+ threadName
+        send_command(s, 'heartbeat', [threadName])
 
 
 class heartBeatEmit(threading.Thread):
@@ -29,16 +45,14 @@ class heartBeatEmit(threading.Thread):
         
     def run(self):        
         heartBeatEmitter(self.name)
-       
-
-
         
 ## this class would have to be imported into the server manager and the hearBeatChecker method could be called
 # to check if any heartbeat has timeout
 
 def heartBeatChecker():
     timeout = 3
-    print 'checking initiated at master'
+    #print 'checking initiated at master'
+
     while True:
         time.sleep(1)
         #print 'checking initiated at master'
@@ -61,21 +75,4 @@ class heartBeatCheck(threading.Thread):
         #self.name = name
         
     def run(self):        
-        heartBeatChecker()        
-
-
-#this method checks datastructures that track the last heartbeattimes and update the serverstatus ds incase the heartbeats 
-#have time out indicating that the process is no longer available and try to revive them 
-
-
-
-
-
-
-
-
-#t1 =  myThread('thread1',5)
-#t2=  myThread('thread2',5)
-
-#t1.start()
-#t2.start()
+        heartBeatChecker()

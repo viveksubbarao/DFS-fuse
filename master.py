@@ -14,51 +14,42 @@ with open('credentials.txt', 'r') as f:
     credentials = f.readline().split(':')
     print credentials
 
-HOST = ''                 # Symbolic name meaning all available interfaces
-PORT = 50008              # Arbitrary non-privileged port
-N1 = 50009
-N2 = 50010
+def process_command(conn):
+    while 1:
+        data = conn.recv(1024)
+        if not data:
+            break
+        execute_command(conn, data)
+    conn.close()
 
-conn_db = ''
-
-def execute_json_command(conn, command_string):
+def execute_command(conn, command_string):
+    log.debug("executing command")
     commandObj = json.loads(command_string)
     param_list = commandObj['param_list']
     command = commandObj['command']
     if command == 'heartbeat':
         heartBeat(param_list)
     else:
-        send_command(command, param_list)
-
-def send_command(command, param_list):
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect((socket.gethostname(), N1))
-
-    command_string = stringify_command(command, param_list)
-    
-    s.send(command_string)
-    journaling(command, param_list, 'N1')
-    s.close()
+        send_command(conn, command, param_list)
 
 def receiving(conn_db):
-    print 'Receiving commands'
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind((HOST, PORT))
-    s.listen(1)
+    log.debug('Receiving commands')
+    global client_sock
+    
+    # Create listening socket
+    client_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client_sock.bind((HOST, M_PORT))
+    client_sock.listen(1)
 
+    # Spawn a thread for each new request. This means that a new thread is
+    # spawned for each client as well as each server.
     while 1:
-        conn, addr = s.accept()
-        print 'Connected by: ', addr
-
-        while 1:
-            data = conn.recv(1024)
-            if not data:
-                break
-            execute_json_command(conn, data)
+        conn, addr = client_sock.accept()
+        log.debug('Connected by: %s', addr)
+        threading.Thread(target=process_command, args=(conn,)).start()
 
     # release source
-    conn.close()
-    s.close()
+    client_sock.close()
 
 
 def journaling(command, param_list, server_id):
@@ -85,14 +76,14 @@ def connection():
     conn_string = "host='" + host + "' dbname='" + dbname + "' user='"+ username +"' password='" + password + "'"
  
     # print the connection string we will use to connect
-    print "Connecting to database\n ->%s" % (conn_string)
+    log.debug("Connecting to database " + conn_string)
  
     # get a connection, if a connect cannot be made an exception will be raised here
     conn_db = psycopg2.connect(conn_string)
  
     # conn.cursor will return a cursor object, you can use this cursor to perform queries
     # cursor = conn.cursor()
-    print "Connected!\n"
+    log.debug("Connected!")
     return conn_db
  
 if __name__ == "__main__":
