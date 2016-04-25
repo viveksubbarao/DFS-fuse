@@ -7,7 +7,8 @@ import logging
 from heartbeat import *
 from common import *
 
-DIR = "/Users/vsrao/ws/sdir"
+# DIR = "/Users/vsrao/ws/sdir"
+DIR = "/Users/chen/repo/python/mount"
 
 class dfs:
 

@@ -1,5 +1,6 @@
 import threading
 import time
+
 from datetime import datetime
 from protocol import *
 from common import *
@@ -53,7 +54,7 @@ def heartBeatChecker():
     timeout = 3
     #print 'checking initiated at master'
 
-    while True:
+    while 1:
         time.sleep(1)
         #print 'checking initiated at master'
         print 'serverstatus ' + str(serverStatus)
@@ -63,9 +64,6 @@ def heartBeatChecker():
             if delta.total_seconds() > timeout:
                 serverStatus[server] = 'dead'
                 #insert call to method that will try reviving it 
-
-
-
 
 
 class heartBeatCheck(threading.Thread):

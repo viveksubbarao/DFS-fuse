@@ -2,13 +2,20 @@
 import socket
 import psycopg2
 
-from heartbeat import *
 from common import *
+from heartbeat import *
 from datetime import datetime
+from dispatch import *
 
 checkheartbeat = heartBeatCheck()
 checkheartbeat.daemon = True
 checkheartbeat.start()
+
+checkdispatch = dispatchCheck()
+checkdispatch.start()
+
+conn_db = None
+DIR = "/Users/chen/repo/python/mount"
 
 with open('credentials.txt', 'r') as f:
     credentials = f.readline().split(':')
@@ -31,6 +38,7 @@ def execute_command(conn, command_string):
         heartBeat(param_list)
     else:
         send_command(conn, command, param_list)
+        journaling(conn_db, command, param_list, 'N1')
 
 def receiving(conn_db):
     log.debug('Receiving commands')
@@ -50,20 +58,6 @@ def receiving(conn_db):
 
     # release source
     client_sock.close()
-
-
-def journaling(command, param_list, server_id):
-    if conn_db is None:
-        print 'Connection error'
-        exit(1)
-
-    cursor = conn_db.cursor()
-    print param_list[0][param_list[0].rindex('/') + 1 : ]
-    sql = 'INSERT ' \
-        + 'INTO dfs_journal(filename, N1, N2) ' \
-        + 'VALUES(\'' + param_list[0][param_list[0].rindex('/') + 1 : ] + '\', CURRENT_TIMESTAMP, null);'
-    cursor.execute(sql)
-    conn_db.commit()
 
 def connection():
     global conn_db
@@ -89,4 +83,3 @@ def connection():
 if __name__ == "__main__":
     conn_db = connection()
     receiving(conn_db)
-
