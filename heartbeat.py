@@ -11,19 +11,38 @@ global heartBeatTimes
 heartBeatTimes = {}
 global serverStatus 
 serverStatus = {}
-
+global aliveServerSet 
+aliveServerSet = set()
+#global aliveServerNumber
+aliveServerNumber = 0
 curr_server_sock = [server1_sock]
 curr_server = 0;
+
 
 def get_curr_server():
     global curr_server_sock, curr_server
     return curr_server_sock[curr_server]
+
+###### this function helps to identify which runing 'alive' server should be picked for performing the operations######
+def getRandomAliveServer():
+#### picks server in a round robin manner and returns it#####
+    global aliveServerNumber
+    listOfAliveServers = list(aliveServerSet)
+    if len(listOfAliveServers) != 0:
+        numOfServers = len(listOfAliveServers)
+        serverName = listOfAliveServers[aliveServerNumber % numOfServers]
+        aliveServerNumber += 1
+        aliveServerNumber %= numOfServers
+        return serverName
+    return None
+
 
 # this method updates the data strucutre for the heartbeat times
 def heartBeat(servername):
     #print 'in heartbeat function '#+idontknow
     heartBeatTimes[servername[0]] = datetime.now()
     serverStatus[servername[0]] = 'alive'
+    aliveServerSet.add(servername[0])
     #print heartbeat.heartBeatTimes
     #print heartbeat.serverStatus
 
@@ -56,6 +75,7 @@ def heartBeatChecker():
 
     while 1:
         time.sleep(1)
+        print 'getting random alive server ' +str(getRandomAliveServer())
         #print 'checking initiated at master'
         print 'serverstatus ' + str(serverStatus)
         #print 'heartbeattimes' + str(heartBeatTimes)
@@ -63,12 +83,14 @@ def heartBeatChecker():
             delta = datetime.now() - heartBeatTimes[server] 
             if delta.total_seconds() > timeout:
                 serverStatus[server] = 'dead'
+                aliveServerSet.discard(server)
                 #insert call to method that will try reviving it 
 
 
 class heartBeatCheck(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
+        aliveServerNumber = 0
 
         #self.name = name
         
