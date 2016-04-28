@@ -4,6 +4,7 @@ import psycopg2
 
 from common import *
 from heartbeat import *
+from protocol import *
 from datetime import datetime
 from dispatch import *
 
@@ -14,12 +15,8 @@ checkheartbeat.start()
 checkdispatch = dispatchCheck()
 checkdispatch.start()
 
-conn_db = None
-DIR = "/Users/chen/repo/python/mount"
-
-with open('credentials.txt', 'r') as f:
-    credentials = f.readline().split(':')
-    print credentials
+#conn_db = None
+#DIR = "/Users/chen/repo/python/mount"
 
 def process_command(conn):
     while 1:
@@ -30,7 +27,7 @@ def process_command(conn):
     conn.close()
 
 def execute_command(conn, command_string):
-    log.debug("executing command")
+    #log.debug("executing command")
     commandObj = json.loads(command_string)
     param_list = commandObj['param_list']
     command = commandObj['command']
@@ -38,9 +35,9 @@ def execute_command(conn, command_string):
         heartBeat(param_list)
     else:
         send_command(conn, command, param_list)
-        journaling(conn_db, command, param_list, 'N1')
+        #journaling(conn_db, command, param_list, 'N1')
 
-def receiving(conn_db):
+def receiving():
     log.debug('Receiving commands')
     global client_sock
     
@@ -58,7 +55,7 @@ def receiving(conn_db):
 
     # release source
     client_sock.close()
-
+'''
 def connection():
     global conn_db
 
@@ -79,7 +76,8 @@ def connection():
     # cursor = conn.cursor()
     log.debug("Connected!")
     return conn_db
- 
+ '''
+
 if __name__ == "__main__":
-    conn_db = connection()
-    receiving(conn_db)
+    #conn_db = connection()
+    receiving()

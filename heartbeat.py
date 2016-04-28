@@ -2,7 +2,7 @@ import threading
 import time
 
 from datetime import datetime
-from protocol import *
+#from protocol import *
 from common import *
 
 ########## data structues to track heartbeats and server status ##############
@@ -15,13 +15,6 @@ global aliveServerSet
 aliveServerSet = set()
 #global aliveServerNumber
 aliveServerNumber = 0
-curr_server_sock = [server1_sock]
-curr_server = 0;
-
-
-def get_curr_server():
-    global curr_server_sock, curr_server
-    return curr_server_sock[curr_server]
 
 ###### this function helps to identify which runing 'alive' server should be picked for performing the operations######
 def getRandomAliveServer():
@@ -29,10 +22,11 @@ def getRandomAliveServer():
     global aliveServerNumber
     listOfAliveServers = list(aliveServerSet)
     if len(listOfAliveServers) != 0:
-        numOfServers = len(listOfAliveServers)
-        serverName = listOfAliveServers[aliveServerNumber % numOfServers]
-        aliveServerNumber += 1
-        aliveServerNumber %= numOfServers
+        #numOfServers = len(listOfAliveServers)
+        #serverName = listOfAliveServers[aliveServerNumber % numOfServers]
+        #aliveServerNumber += 1
+        #aliveServerNumber %= numOfServers
+        serverName = listOfAliveServers[0]
         return serverName
     return None
 
@@ -54,7 +48,11 @@ def heartBeatEmitter(threadName):
     while True:
         time.sleep(1)
         #print 'Emitting heart beats from '+ threadName
-        send_command(s, 'heartbeat', [threadName])
+        #send_command(s, 'heartbeat', [threadName])
+        command_string = stringify_command('heartbeat', [threadName])
+        s.send(command_string)
+    s.close()
+
 
 
 class heartBeatEmit(threading.Thread):
@@ -75,7 +73,7 @@ def heartBeatChecker():
 
     while 1:
         time.sleep(1)
-        print 'getting random alive server ' +str(getRandomAliveServer())
+        #print 'getting random alive server ' +str(getRandomAliveServer())
         #print 'checking initiated at master'
         print 'serverstatus ' + str(serverStatus)
         #print 'heartbeattimes' + str(heartBeatTimes)

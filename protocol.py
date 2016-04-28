@@ -18,8 +18,10 @@ def send_command(conn, command, param_list):
     # Get currently used servers communication socket
     # TODO - make this generic. The heartbeat infrastructure should
     # give us the current active servers socket
+	s_port = getRandomAliveServer()
+
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	sock.connect((HOST, S1_PORT))
+	sock.connect((HOST, server_port[s_port]))
 
     # Send the JSON command + param string
 	sock.send(command_string)

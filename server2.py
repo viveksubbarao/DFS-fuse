@@ -7,16 +7,12 @@ import logging
 from heartbeat import *
 from common import *
 
-HOST = ''                 # Symbolic name meaning all available interfaces
-# PORT = 50007              # Arbitrary non-privileged port
-DIR = "/Users/vsrao/ws/sdir"
-
 class dfs:
 
     def _full_path(self, partial):
         if partial.startswith("/"):
             partial = partial[1:]
-        path = os.path.join(DIR, partial)
+        path = os.path.join(DIR_S2, partial)
         return path
 
     # Filesystem methods
@@ -192,11 +188,11 @@ class dfs:
         path = self._full_path(param_list[0])
         return self.dfs_flush(path, param_list[1])
     
-    dfs_oper = {'DFS_ACCESS' : dfs_access, 'DFS_CHMOD' : dfs_chmod, 'DFS_CHOWN' : dfs_chown, 'DFS_GETATTR' : dfs_getattr, 'DFS_READDIR' : dfs_readdir,
-            'DFS_READLINK' : dfs_readlink, 'DFS_MKNOD' : dfs_mknod, 'DFS_RMDIR' : dfs_rmdir, 'DFS_MKDIR' : dfs_mkdir, 'DFS_STATFS' : dfs_statfs,
-            'DFS_UNLINK' : dfs_unlink, 'DFS_SYMLINK': dfs_symlink, 'DFS_RENAME' : dfs_rename, 'DFS_LINK' : dfs_link, 'DFS_UTIMES' : dfs_utime,
-            'DFS_OPEN' : dfs_open, 'DFS_CREATE' : dfs_create, 'DFS_READ' : dfs_read, 'DFS_WRITE' : dfs_write, 'DFS_TRUNCATE' : dfs_truncate,
-            'DFS_FLUSH' : dfs_flush, 'DFS_RELEASE' : dfs_release, 'DFS_FSYNC' : dfs_fsync
+    dfs_oper = {DFS_ACCESS : dfs_access, DFS_CHMOD : dfs_chmod, DFS_CHOWN : dfs_chown, DFS_GETATTR : dfs_getattr, DFS_READDIR : dfs_readdir,
+            DFS_READLINK : dfs_readlink, DFS_MKNOD : dfs_mknod, DFS_RMDIR : dfs_rmdir, DFS_MKDIR : dfs_mkdir, DFS_STATFS : dfs_statfs,
+            DFS_UNLINK : dfs_unlink, DFS_SYMLINK: dfs_symlink, DFS_RENAME : dfs_rename, DFS_LINK : dfs_link, DFS_UTIMENS : dfs_utime,
+            DFS_OPEN : dfs_open, DFS_CREATE : dfs_create, DFS_READ : dfs_read, DFS_WRITE : dfs_write, DFS_TRUNCATE : dfs_truncate,
+            DFS_FLUSH : dfs_flush, DFS_RELEASE : dfs_release, DFS_FSYNC : dfs_fsync
     }
 
 dfsObj = dfs()
@@ -208,13 +204,16 @@ def execute_json_command(conn, command_string):
     
     logging.debug(command)
     logging.debug(param_list)
-    logging.debug(dfsObj.dfs_oper['DFS_' + command.upper()])
+    #logging.debug(dfsObj.dfs_oper['DFS_' + command.upper()])
 
-    ret = dfsObj.dfs_oper['DFS_' + command.upper()](dfsObj, param_list)
+    ret = dfsObj.dfs_oper[command](dfsObj, param_list)
     result_string = stringify_result(ret)
     conn.send(result_string)
 
-def main(PORT):
+def main():
+
+    if not os.path.exists(DIR_S2):
+        os.mkdir(DIR_S2)
 
     #begin - rakesh
     # added code here to emit heartbeats from server to master 
@@ -224,7 +223,7 @@ def main(PORT):
     #end 
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind((HOST, PORT))
+    s.bind((HOST, S2_PORT))
     s.listen(1)
     
     while 1:
@@ -235,14 +234,9 @@ def main(PORT):
             data = conn.recv(1024)
             if not data: break
             execute_json_command(conn, data)
-        
-    conn.close()
+        conn.close()
+
     s.close()
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print 'Usage: python server_port'
-        exit(1)
-    # print type()
-    port = int(sys.argv[1])
-    main(port)
+    main()

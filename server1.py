@@ -7,15 +7,12 @@ import logging
 from heartbeat import *
 from common import *
 
-# DIR = "/Users/vsrao/ws/sdir"
-DIR = "/Users/chen/repo/python/mount"
-
 class dfs:
 
     def _full_path(self, partial):
         if partial.startswith("/"):
             partial = partial[1:]
-        path = os.path.join(DIR, partial)
+        path = os.path.join(DIR_S1, partial)
         return path
 
     # Filesystem methods
@@ -214,6 +211,9 @@ def execute_json_command(conn, command_string):
     conn.send(result_string)
 
 def main():
+
+    if not os.path.exists(DIR_S1):
+        os.mkdir(DIR_S1)
 
     #begin - rakesh
     # added code here to emit heartbeats from server to master 
