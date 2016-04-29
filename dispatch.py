@@ -31,7 +31,7 @@ class Dispatch:
             # If the list has another item after it, compare them
             if self.node_list.index(node) < len(self.node_list) - 1: 
                 node2 = self.node_list[self.node_list.index(node) + 1]
-                #print '\nComparing Node ' + str(self.node_list.index(node)) + ' and Node ' + str(self.node_list.index(node) + 1) + ':'
+                log.debug('\nComparing Node ' + str(self.node_list.index(node)) + ' and Node ' + str(self.node_list.index(node) + 1) + ':')
                 # Passes the two root directories of the nodes to the recursive _compare_directories.
                 self._compare_directories(node.root_path, node2.root_path)
     
@@ -68,11 +68,11 @@ class Dispatch:
             if os.path.isdir(srcpath):
                 shutil.copytree(srcpath, os.path.join(dest, os.path.basename(f)))
                 self.folder_copied_count = self.folder_copied_count + 1
-                #print 'Copied directory \"' + os.path.basename(srcpath) + '\" from \"' + os.path.dirname(srcpath) + '\" to \"' + dest + '\"'
+                log.debug('Copied directory \"' + os.path.basename(srcpath) + '\" from \"' + os.path.dirname(srcpath) + '\" to \"' + dest + '\"')
             else:
                 shutil.copy2(srcpath, dest)
                 self.file_copied_count = self.file_copied_count + 1
-                #print 'Copied \"' + os.path.basename(srcpath) + '\" from \"' + os.path.dirname(srcpath) + '\" to \"' + dest + '\"'
+                log.debug('Copied \"' + os.path.basename(srcpath) + '\" from \"' + os.path.dirname(srcpath) + '\" to \"' + dest + '\"')
 
 
 class Node:
@@ -93,8 +93,8 @@ def dispatchChecker():
     while 1:
         time.sleep(1)
         my_dispatch.compare_nodes()
-        #print 'Total files copied ' + str(my_dispatch.file_copied_count)
-        #print 'Total folders copied ' + str(my_dispatch.folder_copied_count)
+        log.debug('Total files copied ' + str(my_dispatch.file_copied_count))
+        log.debug('Total folders copied ' + str(my_dispatch.folder_copied_count))
 
 class dispatchCheck(threading.Thread):
     def __init__(self):

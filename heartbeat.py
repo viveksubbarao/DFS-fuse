@@ -2,7 +2,6 @@ import threading
 import time
 
 from datetime import datetime
-#from protocol import *
 from common import *
 
 ########## data structues to track heartbeats and server status ##############
@@ -13,19 +12,13 @@ global serverStatus
 serverStatus = {}
 global aliveServerSet 
 aliveServerSet = set()
-#global aliveServerNumber
 aliveServerNumber = 0
 
 ###### this function helps to identify which runing 'alive' server should be picked for performing the operations######
 def getRandomAliveServer():
-#### picks server in a round robin manner and returns it#####
     global aliveServerNumber
     listOfAliveServers = list(aliveServerSet)
     if len(listOfAliveServers) != 0:
-        #numOfServers = len(listOfAliveServers)
-        #serverName = listOfAliveServers[aliveServerNumber % numOfServers]
-        #aliveServerNumber += 1
-        #aliveServerNumber %= numOfServers
         serverName = listOfAliveServers[0]
         return serverName
     return None
@@ -33,22 +26,20 @@ def getRandomAliveServer():
 
 # this method updates the data strucutre for the heartbeat times
 def heartBeat(servername):
-    #print 'in heartbeat function '#+idontknow
     heartBeatTimes[servername[0]] = datetime.now()
     serverStatus[servername[0]] = 'alive'
     aliveServerSet.add(servername[0])
-    #print heartbeat.heartBeatTimes
-    #print heartbeat.serverStatus
+    log.debug(heartBeatTimes)
+    log.debug(serverStatus)
 
-## this cass would have to be imported into the server processes and the heartbeat emitter threat would emit  
+## this cass would have to be imported into the server processes and the heartbeat emitter thread would emit  
 ##  heartbeats
 def heartBeatEmitter(threadName):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((HOST, M_PORT))
     while True:
         time.sleep(1)
-        #print 'Emitting heart beats from '+ threadName
-        #send_command(s, 'heartbeat', [threadName])
+        log.debug('Emitting heart beats from '+ threadName)
         command_string = stringify_command('heartbeat', [threadName])
         s.send(command_string)
     s.close()
@@ -69,28 +60,23 @@ class heartBeatEmit(threading.Thread):
 
 def heartBeatChecker():
     timeout = 3
-    #print 'checking initiated at master'
+    log.debug('checking initiated at master')
 
     while 1:
         time.sleep(1)
-        #print 'getting random alive server ' +str(getRandomAliveServer())
-        #print 'checking initiated at master'
-        print 'serverstatus ' + str(serverStatus)
-        #print 'heartbeattimes' + str(heartBeatTimes)
+        log.debug('serverstatus ' + str(serverStatus))
+        log.debug('heartbeattimes' + str(heartBeatTimes))
         for server in heartBeatTimes:
             delta = datetime.now() - heartBeatTimes[server] 
             if delta.total_seconds() > timeout:
                 serverStatus[server] = 'dead'
                 aliveServerSet.discard(server)
-                #insert call to method that will try reviving it 
 
 
 class heartBeatCheck(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
         aliveServerNumber = 0
-
-        #self.name = name
         
     def run(self):        
         heartBeatChecker()

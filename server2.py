@@ -204,7 +204,6 @@ def execute_json_command(conn, command_string):
     
     logging.debug(command)
     logging.debug(param_list)
-    #logging.debug(dfsObj.dfs_oper['DFS_' + command.upper()])
 
     ret = dfsObj.dfs_oper[command](dfsObj, param_list)
     result_string = stringify_result(ret)
@@ -215,12 +214,10 @@ def main():
     if not os.path.exists(DIR_S2):
         os.mkdir(DIR_S2)
 
-    #begin - rakesh
-    # added code here to emit heartbeats from server to master 
+    # Start heatbeat
     emitheartbeats = heartBeatEmit('s2')
     emitheartbeats.daemon = True
     emitheartbeats.start()
-    #end 
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind((HOST, S2_PORT))

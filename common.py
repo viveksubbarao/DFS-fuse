@@ -6,7 +6,7 @@ import logging
 
 logging.basicConfig(stream=sys.stderr, format='%(asctime)s - %(levelname)s - %(message)s')
 log = logging.getLogger()
-log.setLevel(logging.INFO)
+log.setLevel(logging.CRITICAL)
 
 client_sock = -1
 server1_sock = -1
@@ -16,7 +16,6 @@ HOST = '' # Symbolic name meaning all available interfaces
 M_PORT = 50008 # master listening port
 S1_PORT = 50009 # server 1 listening port
 S2_PORT = 50010 # server 2 listening port
-#HB_PORT = 50011 # heartbeat listening port
 
 server_port = {"s1": S1_PORT, "s2": S2_PORT}
 
