@@ -33,7 +33,11 @@ def send_command(conn, command, param_list):
     # where the master does not handle the reply.
 	sock.close()
 
+
+#define new function here 
+
 def send_and_recv(conn, command, param_list):
+	#new_connection#get connection object from master 
 	log.debug('send_and_recv')
 	command_string = stringify_command(command, param_list)
 	conn.send(command_string)
