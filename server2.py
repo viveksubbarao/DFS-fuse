@@ -204,7 +204,7 @@ def execute_json_command(conn, command_string):
     
     logging.debug(command)
     logging.debug(param_list)
-
+    #print 'executing command at s2'
     ret = dfsObj.dfs_oper[command](dfsObj, param_list)
     result_string = stringify_result(ret)
     conn.send(result_string)

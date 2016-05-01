@@ -19,16 +19,21 @@ def getRandomAliveServer():
     global aliveServerNumber
     listOfAliveServers = list(aliveServerSet)
     if len(listOfAliveServers) != 0:
-        serverName = listOfAliveServers[0]
-        return serverName
+        #print listOfAliveServers[0]
+        server_tuple = listOfAliveServers[0]
+        serverName = listOfAliveServers[0][0]
+        server_conn_obj = listOfAliveServers[0][1]
+        #print server_conn_obj.getpeername()
+        return str(server_conn_obj.getpeername()[0])+','+str(server_port[serverName])
     return None
 
 
 # this method updates the data strucutre for the heartbeat times
-def heartBeat(servername):
+def heartBeat(conn,servername):
+    #print conn.getpeername()    
     heartBeatTimes[servername[0]] = datetime.now()
-    serverStatus[servername[0]] = 'alive'
-    aliveServerSet.add(servername[0])
+    serverStatus[servername[0]] = ('alive',conn)
+    aliveServerSet.add((servername[0],conn))
     log.debug(heartBeatTimes)
     log.debug(serverStatus)
 
@@ -38,7 +43,7 @@ def heartBeatEmitter(threadName):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((HOST, M_PORT))
     while True:
-        time.sleep(1)
+        time.sleep(3)
         log.debug('Emitting heart beats from '+ threadName)
         command_string = stringify_command('heartbeat', [threadName])
         s.send(command_string)
@@ -63,14 +68,21 @@ def heartBeatChecker():
     log.debug('checking initiated at master')
 
     while 1:
-        time.sleep(1)
+        time.sleep(3)
+        #comment this out
+        #print 'randomly retuned' + str(getRandomAliveServer())
         log.debug('serverstatus ' + str(serverStatus))
+        print 'serverstatus ' + str(serverStatus)
+        print 'alive set '+ str(aliveServerSet)
         log.debug('heartbeattimes' + str(heartBeatTimes))
         for server in heartBeatTimes:
             delta = datetime.now() - heartBeatTimes[server] 
             if delta.total_seconds() > timeout:
-                serverStatus[server] = 'dead'
-                aliveServerSet.discard(server)
+                conn_obj = serverStatus[server][1]
+                #print serverStatus[server]
+                serverStatus[server] = ('dead',conn_obj)
+                #print server+' has died'
+                aliveServerSet.discard((server,conn_obj))
 
 
 class heartBeatCheck(threading.Thread):
