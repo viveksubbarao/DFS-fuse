@@ -6,6 +6,7 @@ import logging
 
 from heartbeat import *
 from common import *
+from sync import *
 
 class dfs:
 
@@ -217,6 +218,13 @@ def main():
     emitheartbeats = heartBeatEmit('s1')
     emitheartbeats.daemon = True
     emitheartbeats.start()
+
+    
+    #start file sync service
+    filesyncer = fileSync(DIR_S1)
+    filesyncer.daemon = True
+    filesyncer.start()
+
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind((HOST, S1_PORT))

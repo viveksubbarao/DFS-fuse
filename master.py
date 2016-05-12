@@ -13,7 +13,7 @@ checkheartbeat.start()
 
 checkdispatch = dispatchCheck()
 checkdispatch.daemon = True
-checkdispatch.start()
+#checkdispatch.start()
 
 def process_command(conn):
     while 1:

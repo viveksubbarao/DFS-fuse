@@ -25,7 +25,7 @@ def getRandomAliveServer():
         server_conn_obj = listOfAliveServers[0][1]
         #print server_conn_obj.getpeername()
         return str(server_conn_obj.getpeername()[0])+','+str(server_port[serverName])
-    return None
+    return 'None'
 
 
 # this method updates the data strucutre for the heartbeat times

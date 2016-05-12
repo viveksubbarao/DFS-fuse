@@ -53,7 +53,7 @@ def send_and_recv(conn, command, param_list):
 	#server_conn_obj = pickle.loads(get_server_conn_obj(conn))
 	#print 'tuple recevied '+ server_conn_obj
 	#print 'got server conn obj'
-	if server_conn_obj != None:
+	if server_conn_obj != 'None':
 		log.debug('send_and_recv')
 		command_string = stringify_command(command, param_list)
 		temp_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
